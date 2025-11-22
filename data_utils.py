@@ -53,10 +53,15 @@ def generate_synthetic_glucose_data(n_days=30, sampling_interval_minutes=5, seed
     for meal_time in meal_times:
         if meal_time < n_samples:
             # Glucose spike after meal (peaks at 1 hour, returns to baseline in 3 hours)
-            for i in range(n_samples):
-                time_since_meal = i - meal_time
-                if 0 <= time_since_meal <= (3 * 60 / sampling_interval_minutes):
-                    meal_effects[i] += 50 * np.exp(-((time_since_meal - 12) ** 2) / 200)
+            # Vectorized calculation for efficiency
+            meal_time_int = int(meal_time)
+            window_size = int(3 * 60 / sampling_interval_minutes)
+            end_idx = min(meal_time_int + window_size + 1, n_samples)
+            
+            if meal_time_int < n_samples:
+                indices = np.arange(meal_time_int, end_idx)
+                time_since_meal = indices - meal_time
+                meal_effects[indices] += 50 * np.exp(-((time_since_meal - 12) ** 2) / 200)
     
     # Random noise
     noise = np.random.normal(0, 5, n_samples)

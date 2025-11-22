@@ -82,7 +82,7 @@ class ARIMABaseline:
     ARIMA baseline model for glucose prediction.
     """
     
-    def __init__(self, horizon_minutes=30, order=(2, 1, 2)):
+    def __init__(self, horizon_minutes=30, order=(2, 1, 2), sampling_interval_minutes=5):
         """
         Initialize the ARIMA model.
         
@@ -92,9 +92,12 @@ class ARIMABaseline:
             Prediction horizon in minutes (30 or 60)
         order : tuple
             ARIMA order (p, d, q)
+        sampling_interval_minutes : int
+            Sampling interval in minutes
         """
         self.horizon_minutes = horizon_minutes
         self.order = order
+        self.sampling_interval_minutes = sampling_interval_minutes
         self.trained = False
         self.last_sequence = None
     
@@ -140,12 +143,12 @@ class ARIMABaseline:
                 model_fit = model.fit()
                 
                 # Forecast steps ahead
-                horizon_steps = self.horizon_minutes // 5  # Assuming 5-minute intervals
+                horizon_steps = self.horizon_minutes // self.sampling_interval_minutes
                 forecast = model_fit.forecast(steps=horizon_steps)
                 
                 # Take the prediction at the specified horizon
                 predictions.append(forecast[-1])
-            except:
+            except Exception as e:
                 # If ARIMA fails, use simple persistence model (last value)
                 predictions.append(sequence[-1])
         
@@ -170,7 +173,10 @@ def evaluate_model(y_true, y_pred):
     """
     mae = np.mean(np.abs(y_true - y_pred))
     rmse = np.sqrt(np.mean((y_true - y_pred) ** 2))
-    mape = np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+    
+    # Calculate MAPE with epsilon to avoid division by zero
+    epsilon = 1e-10
+    mape = np.mean(np.abs((y_true - y_pred) / (y_true + epsilon))) * 100
     
     return {
         'MAE': mae,
