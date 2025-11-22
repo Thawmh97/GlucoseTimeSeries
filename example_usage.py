@@ -28,6 +28,10 @@ def create_sample_glucose_data(output_file: str = 'sample_glucose_data.csv'):
         num_readings = np.random.randint(50, 200)
         start_date = datetime(2024, 1, 1) + timedelta(days=np.random.randint(0, 30))
         
+        # Generate patient-level demographics
+        patient_age = np.random.randint(25, 75)
+        patient_gender = np.random.choice(['M', 'F'])
+        
         # Generate timestamps (5-minute intervals with some gaps)
         timestamps = []
         current_time = start_date
@@ -50,8 +54,8 @@ def create_sample_glucose_data(output_file: str = 'sample_glucose_data.csv'):
             'patient_id': patient_id,
             'timestamp': timestamps,
             'glucose': glucose_values,
-            'age': np.random.randint(25, 75),
-            'gender': np.random.choice(['M', 'F'])
+            'age': patient_age,
+            'gender': patient_gender
         })
         
         patients.append(patient_data)

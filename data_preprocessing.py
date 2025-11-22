@@ -10,10 +10,7 @@ This module provides functions for:
 
 import pandas as pd
 import numpy as np
-from typing import Dict, Tuple, Optional
-import warnings
-
-warnings.filterwarnings('ignore')
+from typing import Dict, Optional
 
 
 class GlucoseDataExplorer:
@@ -226,7 +223,7 @@ class GlucoseDataExplorer:
         report.append("2. PATIENT INFORMATION")
         report.append("-" * 80)
         if self.patient_id_col in self.data.columns:
-            unique_patients = self.get_unique_patients()
+            unique_patients = self.data[self.patient_id_col].nunique()
             recordings_per_patient = self.get_recordings_per_patient()
             
             report.append(f"Total Unique Patients: {unique_patients}")
@@ -241,7 +238,7 @@ class GlucoseDataExplorer:
         # Recording info
         report.append("3. RECORDING STATISTICS")
         report.append("-" * 80)
-        report.append(f"Total Recordings: {self.get_total_recordings():,}")
+        report.append(f"Total Recordings: {len(self.data):,}")
         report.append("")
         
         # Time duration info
